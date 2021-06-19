@@ -1,8 +1,8 @@
-package org.unlam.cripto;
-
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.util.Assert;
+import org.unlam.cripto.CipherRunner;
 import org.unlam.cripto.ciphers.Cipher;
 import org.unlam.cripto.ciphers.mickey.MickeyImpl;
 
@@ -10,21 +10,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Random;
 
-@SpringBootApplication
-public class CipherRunner implements CommandLineRunner {
+@SpringBootTest
+@ContextConfiguration(classes = {CipherRunner.class,})
+public class UnitTests {
 
-    /**
-     * Spring boot application bootstrap. Application main method.
-     *
-     * @param args JVM command arguments.
-     */
-    public static void main(String[] args) {
-        SpringApplication.run(CipherRunner.class, args);
-    }
-
-    @Override
-    public void run(String... args) throws Exception {
-
+    @Test
+    public void canEncryptAndDecrypt() {
         boolean[] K = generateRandomBooleanArray(80);
         boolean[] IV = generateRandomBooleanArray(40);
 
@@ -33,15 +24,9 @@ public class CipherRunner implements CommandLineRunner {
 
         String message = "hola";
         byte[] bytemessage = message.getBytes(StandardCharsets.UTF_8);
-
         byte[] encryptedMessage = mickey.encrypt(bytemessage);
-
-        System.out.println("encrypted: " + Arrays.toString(encryptedMessage));
-
         byte[] decrypted = mickey2.encrypt(encryptedMessage);
-
-        System.out.println("decrypted: " + new String(decrypted));
-
+        Assert.isTrue(new String(decrypted).equals(message));
     }
 
     public boolean[] generateRandomBooleanArray(int length) {
@@ -52,4 +37,5 @@ public class CipherRunner implements CommandLineRunner {
         }
         return array;
     }
+
 }
