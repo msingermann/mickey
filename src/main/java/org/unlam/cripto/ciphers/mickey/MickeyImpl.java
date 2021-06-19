@@ -2,11 +2,13 @@ package org.unlam.cripto.ciphers.mickey;
 
 import org.unlam.cripto.ciphers.Cipher;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
 
 public class MickeyImpl implements Cipher {
+    private static final int LENGTH = 80;
     private static final String STRING_COMP_0 = "00001100010111101001010101010110100100000001010101000010100111100101011111111100";
     private static final String STRING_COMP_1 = "01011001011110010100011010111011110001101011100001000101110001111110101110111100";
     private static final String STRING_FB_0 = "11110101111111100101111111111001100000011100100101010010111101010100000000011010";
@@ -19,36 +21,36 @@ public class MickeyImpl implements Cipher {
 
     private List<Integer> RTAPS = Arrays.asList(new Integer[]{0, 2, 4, 6, 7, 8, 9, 13, 14, 16, 17, 20, 22, 24, 26, 27, 28, 34, 35, 37, 39, 41, 43, 49, 51, 52, 54, 56, 62, 67, 69, 71, 73, 76, 78, 79});
 
-    private BitSet R = new BitSet(80);
-    private BitSet S = new BitSet(80);
+    private BitSet R = new BitSet(LENGTH);
+    private BitSet S = new BitSet(LENGTH);
 
-    public MickeyImpl(BitSet K, BitSet IV) {
+    public MickeyImpl(boolean[] K, boolean[] IV) {
         load_iv(IV);
         load_k(K);
         preclock();
     }
 
-    private void load_iv(BitSet iv) {
-        for (int i = 0; i < iv.length(); i++) {
-            clock_kg(R, S, true, iv.get(i));
+    private void load_iv(boolean[] iv) {
+        for (int i = 0; i < iv.length; i++) {
+            clock_kg(true, iv[i]);
         }
     }
 
-    private void load_k(BitSet k) {
-        for (int i = 0; i < k.length(); i++) {
-            clock_kg(R, S, true, k.get(i));
+    private void load_k(boolean[] k) {
+        for (int i = 0; i < LENGTH; i++) {
+            clock_kg(true, k[i]);
         }
     }
 
     private void preclock() {
-        for (int i = 0; i < R.length(); i++) {
-            clock_kg(R, S, true, false);
+        for (int i = 0; i < LENGTH; i++) {
+            clock_kg(true, false);
         }
     }
 
     public boolean generateKeyStream() {
         boolean z = xor(R.get(0), S.get(0));
-        clock_kg(R, S, false, false);
+        clock_kg(false, false);
         return z;
     }
 
@@ -57,17 +59,17 @@ public class MickeyImpl implements Cipher {
     }
 
     private BitSet clock_r(BitSet R, boolean inputBitR, boolean controlBitR) {
-        boolean feedbackBit = xor(R.get(79), inputBitR);
-        BitSet clockedR = new BitSet(R.length());
+        boolean feedbackBit = xor(R.get(LENGTH - 1), inputBitR);
+        BitSet clockedR = new BitSet(LENGTH);
         clockedR.clear(0);
-        for (int i = 1; i < R.length() - 1; i++) {
+        for (int i = 1; i < LENGTH - 1; i++) {
             if (R.get(i - 1)) clockedR.set(i);
         }
-        for (int i = 0; i < R.length(); i++) {
+        for (int i = 0; i < LENGTH; i++) {
             if (RTAPS.contains(i)) clockedR.set(i, xor(clockedR.get(i), feedbackBit));
         }
         if (controlBitR) {
-            for (int i = 0; i < R.length(); i++) {
+            for (int i = 0; i < LENGTH; i++) {
                 clockedR.set(i, xor(clockedR.get(i), R.get(i)));
             }
         }
@@ -75,26 +77,26 @@ public class MickeyImpl implements Cipher {
     }
 
     private BitSet clock_s(BitSet S, boolean inputBitS, boolean controlBitS) {
-        boolean feedbackBit = xor(S.get(79), inputBitS);
-        BitSet clockedS = new BitSet(S.length());
+        boolean feedbackBit = xor(S.get(LENGTH - 1), inputBitS);
+        BitSet clockedS = new BitSet(LENGTH);
         clockedS.clear(0);
-        for (int i = 1; i < S.length() - 1; i++) {
+        for (int i = 1; i < LENGTH - 1; i++) {
             clockedS.set(i, xor(S.get(i - 1), (xor(S.get(i), COMP0.get(i)) || xor(S.get(i - 1), COMP1.get(i)))));
         }
-        clockedS.set(79, S.get(78));
+        clockedS.set(LENGTH - 1, S.get(LENGTH - 2));
         if(controlBitS) {
-            for (int i = 0; i < S.length(); i++) {
+            for (int i = 0; i < LENGTH; i++) {
                 clockedS.set(i, xor(clockedS.get(i), (FB0.get(i) || feedbackBit)));
             }
         } else {
-            for (int i = 0; i < S.length(); i++) {
+            for (int i = 0; i < LENGTH; i++) {
                 clockedS.set(i, xor(clockedS.get(i), (FB1.get(i) || feedbackBit)));
             }
         }
         return clockedS;
     }
 
-    private void clock_kg(BitSet R, BitSet S, boolean mixing, boolean inputBit) {
+    private void clock_kg(boolean mixing, boolean inputBit) {
         boolean controlBitR = xor(S.get(27), R.get(53));
         boolean controlBitS = xor(S.get(53), R.get(26));
 
@@ -114,12 +116,13 @@ public class MickeyImpl implements Cipher {
     }
 
     @Override
-    public String encrypt(String message) {
-        return null;
+    public byte[] encrypt(byte[] message) {
+        BitSet messageBitSet = BitSet.valueOf(message);
+        BitSet encryptedBitSet = new BitSet();
+        for (int i = 0; i < message.length * 8; i++) {
+            encryptedBitSet.set(i, xor(messageBitSet.get(i), this.generateKeyStream()));
+        }
+        return encryptedBitSet.toByteArray();
     }
 
-    @Override
-    public char encrypt(char character) {
-        return 0;
-    }
 }

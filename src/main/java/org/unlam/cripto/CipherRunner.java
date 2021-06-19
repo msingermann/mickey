@@ -6,6 +6,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.unlam.cripto.ciphers.mickey.MickeyImpl;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Random;
 
@@ -24,24 +26,31 @@ public class CipherRunner implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
-        BitSet K = generateRandomBitSet(80);
-        BitSet IV = generateRandomBitSet(40);
+        boolean[] K = generateRandomBooleanArray(80);
+        boolean[] IV = generateRandomBooleanArray(40);
 
         MickeyImpl mickey = new MickeyImpl(K, IV);
+        MickeyImpl mickey2 = new MickeyImpl(K, IV);
 
-//        mickey.generateKeyStream();
-//
-//        mickey.encrypt("hola");
+        String message = "hola";
+        byte[] bytemessage = message.getBytes(StandardCharsets.UTF_8);
 
+        byte[] encryptedMessage = mickey.encrypt(bytemessage);
+
+        System.out.println("encrypted: " + Arrays.toString(encryptedMessage));
+
+        byte[] decrypted = mickey2.encrypt(encryptedMessage);
+
+        System.out.println("decrypted: " + new String(decrypted));
 
     }
 
-    public BitSet generateRandomBitSet(int length) {
+    public boolean[] generateRandomBooleanArray(int length) {
         Random random = new Random();
-        BitSet bitSet = new BitSet(length);
+        boolean[] array = new boolean[length];
         for (int i = 0; i < length; i++) {
-            bitSet.set(i, random.nextBoolean());
+            array[i] = random.nextBoolean();
         }
-        return bitSet;
+        return array;
     }
 }
