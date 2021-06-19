@@ -1,16 +1,22 @@
 package org.unlam.cripto.ciphers.mickey;
 
+import com.google.common.base.Stopwatch;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.unlam.cripto.ciphers.Cipher;
 import org.unlam.cripto.utils.Utils;
 
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Mickey cipher based on "The stream cipher MICKEY (version 1) - Algorithm specification issue 1.0" (https://www.ecrypt.eu.org/stream/ciphers/mickey/mickey.pdf)
  */
 public class Mickey implements Cipher {
+
+    private static final Logger LOGGER = LogManager.getLogger(Mickey.class);
 
     /**
      * In Mickey Phase 1 the length is 80 bits for the registers and key.
@@ -20,13 +26,12 @@ public class Mickey implements Cipher {
     private static final String STRING_COMP_1 = "01011001011110010100011010111011110001101011100001000101110001111110101110111100";
     private static final String STRING_FB_0 = "11110101111111100101111111111001100000011100100101010010111101010100000000011010";
     private static final String STRING_FB_1 = "11101110000111010011000100110010110001100000110110001000100100101101010010100011";
+    private static final List<Integer> RTAPS = Arrays.asList(new Integer[]{0, 2, 4, 6, 7, 8, 9, 13, 14, 16, 17, 20, 22, 24, 26, 27, 28, 34, 35, 37, 39, 41, 43, 49, 51, 52, 54, 56, 62, 67, 69, 71, 73, 76, 78, 79});
 
     private final BitSet COMP0 = Utils.initBitSetFromString(STRING_COMP_0);
     private final BitSet COMP1 = Utils.initBitSetFromString(STRING_COMP_1);
     private final BitSet FB0 = Utils.initBitSetFromString(STRING_FB_0);
     private final BitSet FB1 = Utils.initBitSetFromString(STRING_FB_1);
-
-    private List<Integer> RTAPS = Arrays.asList(new Integer[]{0, 2, 4, 6, 7, 8, 9, 13, 14, 16, 17, 20, 22, 24, 26, 27, 28, 34, 35, 37, 39, 41, 43, 49, 51, 52, 54, 56, 62, 67, 69, 71, 73, 76, 78, 79});
 
     /**
      * R registry.
@@ -39,6 +44,7 @@ public class Mickey implements Cipher {
     private BitSet S = new BitSet(FIXED_KEY_LENGTH);
 
     public Mickey(boolean[] K, boolean[] IV) {
+        Stopwatch sw = Stopwatch.createStarted();
         if (K.length != FIXED_KEY_LENGTH || IV.length > FIXED_KEY_LENGTH) {
             throw new RuntimeException("Key and Initialization vector error");
         }
@@ -46,6 +52,7 @@ public class Mickey implements Cipher {
         load_array(IV);
         load_array(K);
         preclock();
+        LOGGER.info("Mickey Initialized in: {}ms", sw.elapsed(TimeUnit.MILLISECONDS));
     }
 
     private void load_array(boolean[] array) {
@@ -144,11 +151,13 @@ public class Mickey implements Cipher {
 
     @Override
     public byte[] encrypt(byte[] message) {
+        Stopwatch sw = Stopwatch.createStarted();
         BitSet messageBitSet = BitSet.valueOf(message);
         BitSet encryptedBitSet = new BitSet();
         for (int i = 0; i < message.length * 8; i++) {
             encryptedBitSet.set(i, messageBitSet.get(i) ^ this.generateKeyStream());
         }
+        LOGGER.info("Process finished. took: {}ms", sw.elapsed(TimeUnit.MILLISECONDS));
         return encryptedBitSet.toByteArray();
     }
 

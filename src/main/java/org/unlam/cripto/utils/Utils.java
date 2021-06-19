@@ -1,5 +1,9 @@
 package org.unlam.cripto.utils;
 
+import org.apache.commons.io.FileUtils;
+
+import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.BitSet;
 import java.util.Random;
@@ -37,5 +41,15 @@ public class Utils {
             System.out.print(String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0'));
         }
         System.out.println();
+    }
+
+    public static byte[] getImageAsByteArray(String path) throws IOException {
+        File file = new File(path);
+        return FileUtils.readFileToByteArray(file);
+    }
+
+    public static void saveByteArrayToFile(String path, byte[] data) throws IOException {
+        File file = new File(path);
+        FileUtils.writeByteArrayToFile(file, data);
     }
 }

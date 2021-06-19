@@ -9,18 +9,26 @@ import org.unlam.cripto.ciphers.mickey.Mickey;
 import org.unlam.cripto.utils.Utils;
 
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 
 @SpringBootApplication
 public class CipherRunner implements CommandLineRunner {
 
     private String binaryKey;
     private String binaryIV;
+    private String imageInput;
+    private String imageEncrypted;
+    private String imageDecripted;
 
     public CipherRunner(@Value("${ciphers.mickey.key}") BigInteger hexaKey,
-                        @Value("${ciphers.mickey.iv}") BigInteger hexaIV) {
+                        @Value("${ciphers.mickey.iv}") BigInteger hexaIV,
+                        @Value("${imageInput}") String imageInput,
+                        @Value("${imageEncrypted}") String imageEncrypted,
+                        @Value("${imageDecripted}") String imageDecripted) {
         this.binaryKey = hexaKey.toString(2);
         this.binaryIV = hexaIV.toString(2);
+        this.imageInput = imageInput;
+        this.imageEncrypted = imageEncrypted;
+        this.imageDecripted = imageDecripted;
     }
 
     /**
@@ -41,24 +49,22 @@ public class CipherRunner implements CommandLineRunner {
         Cipher mickey = new Mickey(K, IV);
         Cipher mickey2 = new Mickey(K, IV);
 
-        String message = "hola";
-        System.out.println("ascii message: " + message);
+        byte[] bytemessage = Utils.getImageAsByteArray(imageInput);
 
-        byte[] bytemessage = message.getBytes(StandardCharsets.UTF_8);
-        System.out.print("binary message: ");
-        Utils.printByteArrayAsBinary(bytemessage);
+//        System.out.print("binary message: ");
+//        Utils.printByteArrayAsBinary(bytemessage);
 
         byte[] encryptedMessage = mickey.encrypt(bytemessage);
-        System.out.print("encrypted:      ");
-        Utils.printByteArrayAsBinary(encryptedMessage);
+        Utils.saveByteArrayToFile(imageEncrypted, encryptedMessage);
+//        System.out.print("encrypted:      ");
+//        Utils.printByteArrayAsBinary(encryptedMessage);
 
 
         byte[] decrypted = mickey2.decrypt(encryptedMessage);
+        Utils.saveByteArrayToFile(imageDecripted, decrypted);
 
-        System.out.print("decrypted:      ");
-        Utils.printByteArrayAsBinary(bytemessage);
-
-        System.out.println("ascii decrypted: " + new String(decrypted));
+//        System.out.print("decrypted:      ");
+//        Utils.printByteArrayAsBinary(bytemessage);
 
     }
 }
