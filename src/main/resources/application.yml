@@ -1,0 +1,4 @@
+ciphers:
+  mickey:
+    key: 0xab8322676fd1333f160a #80bits = 20 hex digits
+    iv: 0xa7a36548a932c54a0cfc

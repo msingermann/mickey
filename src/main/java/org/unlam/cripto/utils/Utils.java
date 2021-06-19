@@ -1,5 +1,6 @@
 package org.unlam.cripto.utils;
 
+import java.nio.charset.StandardCharsets;
 import java.util.BitSet;
 import java.util.Random;
 
@@ -20,5 +21,21 @@ public class Utils {
             if (initializer.charAt(i) == '1') bitset.set(i);
         }
         return bitset;
+    }
+
+    public static boolean[] initBooleanArrayFromBinaryString(String initializer) {
+        boolean[] booleanArray = new boolean[initializer.length()];
+        initializer.getBytes(StandardCharsets.UTF_8);
+        for (int i = 0; i < initializer.length(); i++) {
+            if (initializer.charAt(i) == '1') booleanArray[i] = true;
+        }
+        return booleanArray;
+    }
+
+    public static void printByteArrayAsBinary(byte[] array) {
+        for (byte b : array) {
+            System.out.print(String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0'));
+        }
+        System.out.println();
     }
 }
