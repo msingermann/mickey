@@ -4,7 +4,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.unlam.cripto.ciphers.Cipher;
-import org.unlam.cripto.ciphers.mickey.MickeyImpl;
+import org.unlam.cripto.ciphers.mickey.Mickey;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -28,8 +28,8 @@ public class CipherRunner implements CommandLineRunner {
         boolean[] K = generateRandomBooleanArray(80);
         boolean[] IV = generateRandomBooleanArray(40);
 
-        Cipher mickey = new MickeyImpl(K, IV);
-        Cipher mickey2 = new MickeyImpl(K, IV);
+        Cipher mickey = new Mickey(K, IV);
+        Cipher mickey2 = new Mickey(K, IV);
 
         String message = "hola";
         byte[] bytemessage = message.getBytes(StandardCharsets.UTF_8);
