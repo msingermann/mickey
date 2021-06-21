@@ -162,7 +162,7 @@ public class Mickey implements Cipher {
     }
 
     @Override
-    public byte[] decrypt(byte[] message) {
+    public byte[] decrypt(byte[] message) {        
         return encrypt(message);
     }
 
