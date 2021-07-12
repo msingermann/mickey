@@ -72,8 +72,9 @@ public class Mickey implements Cipher {
      *
      * @return keystream bit.
      */
-    private boolean generateKeyStream() {
+    public boolean generateKeyStream() {
         boolean z = R.get(0) ^ S.get(0);
+//        System.out.println(R.get(0) + " " + S.get(0));
         clock_kg(false, false);
         return z;
     }
@@ -89,10 +90,10 @@ public class Mickey implements Cipher {
     private BitSet clock_r(BitSet R, boolean inputBitR, boolean controlBitR) {
         boolean feedbackBit = R.get(FIXED_KEY_LENGTH - 1) ^ inputBitR;
         BitSet clockedR = new BitSet(FIXED_KEY_LENGTH);
-        clockedR.clear(0);
-        for (int i = 1; i < FIXED_KEY_LENGTH - 1; i++) {
-            if (R.get(i - 1)) clockedR.set(i);
+        for (int i = 1; i < FIXED_KEY_LENGTH; i++) {
+            clockedR.set(i, R.get(i - 1));
         }
+        clockedR.clear(0);
         for (int i = 0; i < FIXED_KEY_LENGTH; i++) {
             if (RTAPS.contains(i)) clockedR.set(i, clockedR.get(i) ^ feedbackBit);
         }
@@ -114,19 +115,21 @@ public class Mickey implements Cipher {
      */
     private BitSet clock_s(BitSet S, boolean inputBitS, boolean controlBitS) {
         boolean feedbackBit = S.get(FIXED_KEY_LENGTH - 1) ^ inputBitS;
+        BitSet tempS = new BitSet(FIXED_KEY_LENGTH);
         BitSet clockedS = new BitSet(FIXED_KEY_LENGTH);
-        clockedS.clear(0);
         for (int i = 1; i < FIXED_KEY_LENGTH - 1; i++) {
-            clockedS.set(i, S.get(i - 1) ^ ((S.get(i) ^ COMP0.get(i)) || (S.get(i - 1) ^ COMP1.get(i))));
+            tempS.set(i, S.get(i - 1) ^ ((S.get(i) ^ COMP0.get(i)) || (S.get(i + 1) ^ COMP1.get(i))));
         }
-        clockedS.set(FIXED_KEY_LENGTH - 1, S.get(FIXED_KEY_LENGTH - 2));
+        tempS.clear(0);
+        tempS.set(79, S.get(78));
+
         if (controlBitS) {
             for (int i = 0; i < FIXED_KEY_LENGTH; i++) {
-                clockedS.set(i, clockedS.get(i) ^ (FB0.get(i) || feedbackBit));
+                clockedS.set(i, tempS.get(i) ^ (FB1.get(i) || feedbackBit));
             }
         } else {
             for (int i = 0; i < FIXED_KEY_LENGTH; i++) {
-                clockedS.set(i, clockedS.get(i) ^ (FB1.get(i) || feedbackBit));
+                clockedS.set(i, tempS.get(i) ^ (FB0.get(i) || feedbackBit));
             }
         }
         return clockedS;
@@ -145,6 +148,7 @@ public class Mickey implements Cipher {
         boolean inputBitR = mixing ? inputBit ^ S.get(40) : inputBit;
         boolean inputBitS = inputBit;
 
+//        System.out.println(R);
         R = clock_r(R, inputBitR, controlBitR);
         S = clock_s(S, inputBitS, controlBitS);
     }

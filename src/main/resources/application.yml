@@ -1,8 +1,8 @@
 ciphers:
   mickey:
-    key: 0xab8322676fd1333f160a #80bits = 20 hex digits
+    key: 0xab8322676fd1333f160f #80bits = 20 hex digits
     iv: 0xa7a36548a932c54a0cfc
 
-imageInput: /Users/msingermann/Documents/AAAAA/original.jpeg
-imageEncrypted: /Users/msingermann/Documents/AAAAA/encrypted.jpeg
-imageDecripted: /Users/msingermann/Documents/AAAAA/decripted.jpeg
+imageInput: C:\Users\Marcos\Desktop\Crypto\original.bmp
+imageEncrypted: C:\Users\Marcos\Desktop\Crypto\encrypted.bmp
+imageDecripted: C:\Users\Marcos\Desktop\Crypto\deencrypted.bmp

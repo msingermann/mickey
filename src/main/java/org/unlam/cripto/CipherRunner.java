@@ -13,6 +13,7 @@ import java.math.BigInteger;
 @SpringBootApplication
 public class CipherRunner implements CommandLineRunner {
 
+    private final static int HEADERS_LENGHT = 54 ;
     private String binaryKey;
     private String binaryIV;
     private String imageInput;
@@ -47,24 +48,30 @@ public class CipherRunner implements CommandLineRunner {
         boolean[] IV = Utils.initBooleanArrayFromBinaryString(binaryIV);
 
         Cipher mickey = new Mickey(K, IV);
-        Cipher mickey2 = new Mickey(K, IV);
 
         byte[] bytemessage = Utils.getImageAsByteArray(imageInput);
+        byte[] headers = new byte[HEADERS_LENGHT];
+        byte[] imagen = new byte[bytemessage.length - HEADERS_LENGHT];
 
-//        System.out.print("binary message: ");
-//        Utils.printByteArrayAsBinary(bytemessage);
+        for (int i = 0; i < HEADERS_LENGHT; i++) {
+            headers[i] = bytemessage[i];
+        }
+        for (int i = 0; i < imagen.length; i++) {
+            imagen[i] = bytemessage[i + HEADERS_LENGHT];
+        }
 
-        byte[] encryptedMessage = mickey.encrypt(bytemessage);
-        Utils.saveByteArrayToFile(imageEncrypted, encryptedMessage);
-//        System.out.print("encrypted:      ");
-//        Utils.printByteArrayAsBinary(encryptedMessage);
+        byte[] encryptedImage = mickey.encrypt(imagen);
+        byte[] encriptedImageWithHeader = new byte[encryptedImage.length + HEADERS_LENGHT];
 
 
-        byte[] decrypted = mickey2.decrypt(encryptedMessage);
-        Utils.saveByteArrayToFile(imageDecripted, decrypted);
+        for (int i = 0; i < HEADERS_LENGHT; i++) {
+            encriptedImageWithHeader[i] = headers[i];
+        }
+        for (int i = 0; i < encryptedImage.length; i++) {
+            encriptedImageWithHeader[i + HEADERS_LENGHT] = encryptedImage[i];
+        }
 
-//        System.out.print("decrypted:      ");
-//        Utils.printByteArrayAsBinary(bytemessage);
+        Utils.saveByteArrayToFile(imageEncrypted, encriptedImageWithHeader);
 
     }
 }
