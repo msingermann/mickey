@@ -5,4 +5,6 @@ ciphers:
 
 imageInput: C:\Users\Marcos\Desktop\Crypto\original.bmp
 imageEncrypted: C:\Users\Marcos\Desktop\Crypto\encrypted.bmp
-imageDecripted: C:\Users\Marcos\Desktop\Crypto\deencrypted.bmp
+
+#imageInput: C:\Users\Marcos\Desktop\Crypto\encrypted.bmp
+#imageEncrypted: C:\Users\Marcos\Desktop\Crypto\decrypted.bmp

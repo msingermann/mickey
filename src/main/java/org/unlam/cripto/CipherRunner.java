@@ -18,18 +18,15 @@ public class CipherRunner implements CommandLineRunner {
     private String binaryIV;
     private String imageInput;
     private String imageEncrypted;
-    private String imageDecripted;
 
     public CipherRunner(@Value("${ciphers.mickey.key}") BigInteger hexaKey,
                         @Value("${ciphers.mickey.iv}") BigInteger hexaIV,
                         @Value("${imageInput}") String imageInput,
-                        @Value("${imageEncrypted}") String imageEncrypted,
-                        @Value("${imageDecripted}") String imageDecripted) {
+                        @Value("${imageEncrypted}") String imageEncrypted) {
         this.binaryKey = hexaKey.toString(2);
         this.binaryIV = hexaIV.toString(2);
         this.imageInput = imageInput;
         this.imageEncrypted = imageEncrypted;
-        this.imageDecripted = imageDecripted;
     }
 
     /**

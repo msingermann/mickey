@@ -36,13 +36,6 @@ public class Utils {
         return booleanArray;
     }
 
-    public static void printByteArrayAsBinary(byte[] array) {
-        for (byte b : array) {
-            System.out.print(String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0'));
-        }
-        System.out.println();
-    }
-
     public static byte[] getImageAsByteArray(String path) throws IOException {
         File file = new File(path);
         return FileUtils.readFileToByteArray(file);

@@ -55,12 +55,20 @@ public class Mickey implements Cipher {
         LOGGER.info("Mickey Initialized in: {}ms", sw.elapsed(TimeUnit.MILLISECONDS));
     }
 
+    /**
+     * Loads a vector clocking the registers with it.
+     *
+     * @param array
+     */
     private void load_array(boolean[] array) {
         for (int i = 0; i < array.length; i++) {
             clock_kg(true, array[i]);
         }
     }
 
+    /**
+     * Performs the preclock routine.
+     */
     private void preclock() {
         for (int i = 0; i < FIXED_KEY_LENGTH; i++) {
             clock_kg(true, false);
@@ -74,7 +82,6 @@ public class Mickey implements Cipher {
      */
     public boolean generateKeyStream() {
         boolean z = R.get(0) ^ S.get(0);
-//        System.out.println(R.get(0) + " " + S.get(0));
         clock_kg(false, false);
         return z;
     }
@@ -148,11 +155,13 @@ public class Mickey implements Cipher {
         boolean inputBitR = mixing ? inputBit ^ S.get(40) : inputBit;
         boolean inputBitS = inputBit;
 
-//        System.out.println(R);
         R = clock_r(R, inputBitR, controlBitR);
         S = clock_s(S, inputBitS, controlBitS);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public byte[] encrypt(byte[] message) {
         Stopwatch sw = Stopwatch.createStarted();
@@ -160,11 +169,18 @@ public class Mickey implements Cipher {
         BitSet encryptedBitSet = new BitSet();
         for (int i = 0; i < message.length * 8; i++) {
             encryptedBitSet.set(i, messageBitSet.get(i) ^ this.generateKeyStream());
+            if(i != 0 && i % 500000 == 0) {
+                LOGGER.info( String.format("%.02f", Double.valueOf(i) / (message.length*8) *100) + "%");
+            }
         }
-        LOGGER.info("Process finished. took: {}ms", sw.elapsed(TimeUnit.MILLISECONDS));
+        long time = sw.elapsed(TimeUnit.MILLISECONDS);
+        LOGGER.info("Process finished. took: {}ms Speed: {} Kb/seg ", time, message.length*8/time);
         return encryptedBitSet.toByteArray();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public byte[] decrypt(byte[] message) {
         return encrypt(message);
